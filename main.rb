@@ -1,6 +1,7 @@
 require 'rubygems'
 require 'sinatra'
 require 'pry'
+require 'sinatra/flash'
 
 use Rack::Session::Cookie, :key => 'rack.session',
                            :path => '/',
@@ -58,18 +59,34 @@ helpers do
   end
 
   def winner(msg)
-    @success = "<strong>#{session[:player_name]} wins!</strong> #{msg}"
+    @success = "<strong>#{session[:player_name]} wins!</strong> #{msg}... $#{session[:bet_amount]} added to account. "
     @play_again = true
+    session[:account_balance] += (session[:bet_amount] * 2)
   end
 
   def loser(msg)
-    @error = "<strong>#{session[:player_name]} loses.</strong> #{msg}"
+    @error = "<strong>#{session[:player_name]} loses.</strong> #{msg}... $#{session[:bet_amount]} debited from account. "
     @play_again = true
   end
 
   def tie(msg)
     @success = "<strong>It's a draw.</strong> #{msg}"
     @play_again = true
+    session[:account_balance] += session[:bet_amount]
+  end
+
+  def check_blackjack
+    if calculate_total(session[:player_cards]) == 21
+      winner("Blackjack!!!")
+      @show_buttons = false
+      @player_turn_over = true
+      @play_again = true
+    elsif calculate_total(session[:dealer_cards]) == 21
+      @player_turn_over = true
+      loser("Dealer hit Blackjack!")
+      @show_buttons = false
+      @play_again = true
+    end
   end
 
 end
@@ -78,6 +95,7 @@ before do
   @show_buttons = true
   @dealer_turn = false
   @player_turn_over = false
+  @make_bet = false
 end
 
 get '/new_player' do
@@ -89,15 +107,22 @@ post '/new_player' do
     @error = "Name is required."
     halt erb(:new_player)
   end
+  session[:account_balance] = 500
   session[:player_name] = params[:player_name]
   redirect "/game"
 end
 
 get '/game' do
-  #deck
   suits = ['diamonds', 'hearts', 'clubs', 'spades']
   values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'jack', 'queen', 'king', 'ace']
   session[:deck] = suits.product(values).shuffle!
+  
+  redirect "/make_bet"
+end
+
+get '/make_bet' do
+  @make_bet = true
+  @show_buttons = false
   session[:dealer_cards] = []
   session[:player_cards] = []
   session[:player_cards] << session[:deck].pop
@@ -105,17 +130,36 @@ get '/game' do
   session[:player_cards] << session[:deck].pop
   session[:dealer_cards] << session[:deck].pop
 
-  if calculate_total(session[:player_cards]) == 21
-    winner("Blackjack!!!")
-    @show_buttons = false
-    @player_turn_over = true
-  elsif calculate_total(session[:dealer_cards]) == 21
-    @player_turn_over = true
-    loser("Dealer hit Blackjack!")
-    @show_buttons = false
+  if session[:deck].size < 10
+    redirect "/game"
   end
   erb :game
 end
+
+post '/check_blackjack' do
+  check_blackjack
+end
+
+post '/get_amount' do
+  session[:bet_amount] = params[:bet_amount].to_i
+  if params[:bet_amount].empty?
+    @error = "You actually have to bet. Be courageous!"  
+    @make_bet = true
+    @show_buttons = false
+  elsif session[:bet_amount] > session[:account_balance]
+    @error = "You don't have that kind of money! Try again."
+    @make_bet = true
+    @show_buttons = false
+  elsif  session[:bet_amount] == 0
+    @error = "Please choose a real number."
+    @make_bet = true
+    @show_buttons = false
+  else
+    session[:account_balance] -= session[:bet_amount]
+  end
+  check_blackjack
+  erb :game
+end 
 
 post '/player_hit' do
   session[:player_cards] << session[:deck].pop
@@ -127,7 +171,6 @@ post '/player_hit' do
 end
 
 post '/player_stay' do
-  @success = "You have chosen to stay."
   redirect '/dealer_hit'
 end
 
@@ -154,7 +197,6 @@ post '/dealer_hit' do
   elsif calculate_total(session[:dealer_cards]) <= 21
     compare
   end
-      
   erb :game
 end
 

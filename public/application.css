@@ -11,3 +11,7 @@ img.card_image {
   margin-top: 5px;
   margin-right: 5px;
 }
+
+.bet {
+  float: right;
+}
