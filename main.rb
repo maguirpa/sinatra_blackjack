@@ -132,6 +132,9 @@ get '/make_bet' do
   if session[:deck].size < 10
     redirect "/game"
   end
+  if session[:account_balance] == 0
+    redirect '/broke'
+  end
   erb :game
 end
 
@@ -176,6 +179,7 @@ end
 get '/dealer_hit' do
   @show_buttons = false
   @player_turn_over = true
+
   if calculate_total(session[:dealer_cards]) < 17
     @dealer_turn = true
   elsif calculate_total(session[:dealer_cards]) < 21
@@ -201,6 +205,10 @@ end
 
 get '/game_over' do
   erb :game_over
+end
+
+get '/broke' do
+  erb :broke
 end
 
 

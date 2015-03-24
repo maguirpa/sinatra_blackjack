@@ -80,11 +80,14 @@
 <div class="well">
   <h4>Player's cards:</h4>
   <% if @make_bet %>
+    
     <p>  
         <%= "<img src='/images/cards/cover.jpg'>"%>
         <%= "<img src='/images/cards/cover.jpg'>"%>
     </p>
+
   <% else %>
+
     <p>
       <% session[:player_cards].each do |card| %>
       <%= card_image(card) %>
@@ -93,10 +96,13 @@
     <p>
       <strong>Player total is:</strong> <%= calculate_total(session[:player_cards]) %>
     </p>
+
   <% end %>
+
 </div>
 
 <% if @show_buttons %>
+
   <p>
       What would you like to do? 
   </p>
@@ -110,6 +116,7 @@
       <input type="submit" class="btn btn-warning" value="Stay"/>
     </form>
   </p>
+  
 <% end %>
 
 <% if @winner %>
