@@ -16,23 +16,23 @@ end
 
 helpers do
   def calculate_total(cards)
-  arr = cards.map{|card| card[1] }
+    card_values = cards.map{|card| card[1] }
 
-  card_total = 0
-  arr.each do |card|
-    if card == 'ace'
-      card_total += 11
-    elsif card.to_i == 0
-      card_total += 10
-    else
-      card_total += card.to_i
+    card_total = 0
+    card_values.each do |card|
+      if card == 'ace'
+        card_total += 11
+      elsif card.to_i == 0
+        card_total += 10
+      else
+        card_total += card.to_i
+      end
     end
-  end
-  arr.select{|aces| aces == 'ace'}.count.times do
-    break if card_total <= 21
-      card_total -= 10
-  end
-  card_total
+    card_values.select{|aces| aces == 'ace'}.count.times do
+      break if card_total <= 21
+        card_total -= 10
+      end
+    card_total
   end
 
   def card_image(card)
@@ -124,10 +124,10 @@ get '/make_bet' do
   @show_buttons = false
   session[:dealer_cards] = []
   session[:player_cards] = []
-  session[:player_cards] << session[:deck].pop
-  session[:dealer_cards] << session[:deck].pop
-  session[:player_cards] << session[:deck].pop
-  session[:dealer_cards] << session[:deck].pop
+  2.times do
+    session[:player_cards] << session[:deck].pop
+    session[:dealer_cards] << session[:deck].pop
+  end
 
   if session[:deck].size < 10
     redirect "/game"
