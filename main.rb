@@ -1,7 +1,6 @@
 require 'rubygems'
 require 'sinatra'
 require 'pry'
-require 'sinatra/flash'
 
 use Rack::Session::Cookie, :key => 'rack.session',
                            :path => '/',
