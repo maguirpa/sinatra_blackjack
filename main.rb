@@ -58,18 +58,18 @@ helpers do
   end
 
   def winner(msg)
-    @success = "<strong>#{session[:player_name]} wins!</strong> #{msg}... $#{session[:bet_amount]} added to account. "
+    @winner = "<strong>#{session[:player_name]} wins!</strong> #{msg}... $#{session[:bet_amount]} added to account. "
     @play_again = true
     session[:account_balance] += (session[:bet_amount] * 2)
   end
 
   def loser(msg)
-    @error = "<strong>#{session[:player_name]} loses.</strong> #{msg}... $#{session[:bet_amount]} debited from account. "
+    @loser = "<strong>#{session[:player_name]} loses.</strong> #{msg}... $#{session[:bet_amount]} debited from account. "
     @play_again = true
   end
 
   def tie(msg)
-    @success = "<strong>It's a draw.</strong> #{msg}"
+    @winner = "<strong>It's a draw.</strong> #{msg}"
     @play_again = true
     session[:account_balance] += session[:bet_amount]
   end
@@ -81,9 +81,9 @@ helpers do
       @player_turn_over = true
       @play_again = true
     elsif calculate_total(session[:dealer_cards]) == 21
-      @player_turn_over = true
       loser("Dealer hit Blackjack!")
       @show_buttons = false
+      @player_turn_over = true
       @play_again = true
     end
   end
@@ -138,10 +138,6 @@ get '/make_bet' do
   erb :game
 end
 
-post '/check_blackjack' do
-  check_blackjack
-end
-
 post '/get_amount' do
   session[:bet_amount] = params[:bet_amount].to_i
   if params[:bet_amount].empty?
@@ -169,7 +165,7 @@ post '/player_hit' do
     loser("Looks like #{session[:player_name]} busted at #{player_total}.")
     @show_buttons = false
   end
-  erb :game
+  erb :game, layout: false
 end
 
 post '/player_stay' do
@@ -185,7 +181,7 @@ get '/dealer_hit' do
   elsif calculate_total(session[:dealer_cards]) < 21
     compare
   end
-  erb :game
+  erb :game, layout: false
 end
 
 post '/dealer_hit' do 
@@ -200,7 +196,7 @@ post '/dealer_hit' do
   elsif calculate_total(session[:dealer_cards]) <= 21
     compare
   end
-  erb :game
+  erb :game,layout: false
 end
 
 get '/game_over' do

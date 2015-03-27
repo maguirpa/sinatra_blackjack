@@ -1,3 +1,11 @@
+<div id="game">
+
+<%if @loser %>
+  <div class="alert alert-error"><%=@loser%></div>
+<%elsif @winner %>
+  <div class="alert alert-success"><%=@winner%></div>
+<% end %>
+
 <div class="bet">
   <div class="control-group">
     <label class="control-label" for="inputIcon"><strong>Account</strong></label>
@@ -126,4 +134,7 @@
     </form>
   </p>
 <% end %>
+
+
+</div>
 
