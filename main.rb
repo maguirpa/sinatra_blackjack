@@ -152,6 +152,10 @@ post '/get_amount' do
     @error = "Please choose a real number."
     @make_bet = true
     @show_buttons = false
+  elsif  session[:bet_amount] < 0
+    @error = "How can you bet negative money? Try again."
+    @make_bet = true
+    @show_buttons = false
   else
     session[:account_balance] -= session[:bet_amount]
   end
